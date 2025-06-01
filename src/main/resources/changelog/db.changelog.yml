@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: classpath:changelog/ddl-script/common-ddl-script-v1-create-tables.sql
+#  - include:
+#      file: classpath:community/db/changelog/ddl-script/common-ddl-script-v1-edit-user.sql
+#  - include:
+#      file: classpath:community/db/changelog/ddl-script/common-ddl-script-v1-add-employee-esign-role.sql
