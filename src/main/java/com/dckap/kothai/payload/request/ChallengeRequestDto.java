@@ -36,9 +36,9 @@ public class ChallengeRequestDto {
 
     @NotBlank(message = "Accuracy is required")
     @Schema(description = "Accuracy of the challenge. (0-100)%", example = "90")
-    private Integer accuracy;
+    private double accuracy;
 
     @NotBlank(message = "Speed is required")
     @Schema(description = "Speed of the challenge in words per minute(WPM)", example = "25")
-    private Integer speed;
+    private double speed;
 }

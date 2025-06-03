@@ -39,10 +39,16 @@ public class Challenge extends Auditable<String> {
     private Integer timeLimit;
 
     @Column(name = "required_accuracy", nullable = false)
-    private Integer accuracy;
+    private double accuracy;
 
     @Column(name = "required_speed_wpm", nullable = false)
-    private Integer speed;
+    private double speed;
+
+    @Column(name = "win_xp", nullable = false)
+    private Integer winXp = 0;
+
+    @Column(name = "lose_xp", nullable = false)
+    private Integer loseXp = 0;
 
     @Builder.Default
     @Column(name = "is_active", nullable = false)

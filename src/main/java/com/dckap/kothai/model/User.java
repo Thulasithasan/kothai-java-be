@@ -15,51 +15,57 @@ import java.util.List;
 @Table(name = "users")
 public class User extends Auditable<String> {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "user_id", nullable = false, updatable = false)
-	private Long userId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id", nullable = false, updatable = false)
+    private Long userId;
 
-	@Column(name = "first_name", nullable = false)
-	private String firstName;
+    @Column(name = "first_name", nullable = false)
+    private String firstName;
 
-	@Column(name = "last_name", nullable = false)
-	private String lastName;	
+    @Column(name = "last_name", nullable = false)
+    private String lastName;
 
-	@Column(name = "email", nullable = false, unique = true)
-	private String email;
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
 
-	@Column(name = "password")
-	private String password;
+    @Column(name = "password")
+    private String password;
 
-	@Column(name = "previous_passwords")
-	private String previousPasswords;
+    @Column(name = "previous_passwords")
+    private String previousPasswords;
 
-	@Builder.Default
-	@Column(name = "is_password_changed")
-	private Boolean isPasswordChangedForTheFirstTime = false;
+    @Builder.Default
+    @Column(name = "is_password_changed")
+    private Boolean isPasswordChangedForTheFirstTime = false;
 
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "role_id")
-	private Role role;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id")
+    private Role role;
 
-	@Builder.Default
-	@Column(name = "is_active", nullable = false)
-	private Boolean isActive = true;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserChallenge> userChallenges = new ArrayList<>();
 
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<UserChallenge> userChallenges = new ArrayList<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserBadge> userBadges = new ArrayList<>();
 
-	public List<String> getPreviousPasswordsList() {
-		if (previousPasswords == null || previousPasswords.isEmpty()) {
-			return new ArrayList<>();
-		}
-		return new ArrayList<>(List.of(previousPasswords.split(",")));
-	}
+    @Column(name = "total_xp")
+    private Integer totalXp = 0;
 
-	public void addPreviousPassword(String password) {
-		List<String> previousPasswordList = getPreviousPasswordsList();
-		previousPasswordList.add(password);
-		this.previousPasswords = String.join(",", previousPasswordList);
-	}
+    @Builder.Default
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
+    public List<String> getPreviousPasswordsList() {
+        if (previousPasswords == null || previousPasswords.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(List.of(previousPasswords.split(",")));
+    }
+
+    public void addPreviousPassword(String password) {
+        List<String> previousPasswordList = getPreviousPasswordsList();
+        previousPasswordList.add(password);
+        this.previousPasswords = String.join(",", previousPasswordList);
+    }
 }

@@ -16,10 +16,12 @@ public interface UserChallengeRepository extends JpaRepository<UserChallenge, Lo
     @Query("SELECT uc FROM UserChallenge uc WHERE uc.user.id = :userId")
     List<UserChallenge> findByUserId(@Param("userId") Long userId);
 
+    @Query("SELECT uc FROM UserChallenge uc WHERE uc.user.id = :userId AND uc.status='COMPLETED'")
+    List<UserChallenge> findByUserIdAndStatusCompleted(@Param("userId") Long userId);
+
     @Query("SELECT uc FROM UserChallenge uc WHERE uc.user.id = :userId ORDER BY uc.createdDate DESC")
     Optional<UserChallenge> findTopByUserIdOrderByCreatedDateDesc(@Param("userId") Long userId);
 
     @Query(" SELECT uc FROM UserChallenge uc JOIN uc.challenge c WHERE uc.user.id = :userId AND uc.status='COMPLETED' ORDER BY c.level DESC limit 1")
     Optional<UserChallenge> findTopByUserIdOrderByChallengeLevelDesc(@Param("userId") Long userId);
-
 }

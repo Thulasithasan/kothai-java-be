@@ -13,6 +13,8 @@ public enum CommonMessageConstant implements MessageConstant {
 	COMMON_ERROR_CHALLENGE_NOT_FOUND("api.error.common.challenge-not-found"),
 	COMMON_ERROR_CHALLENGE_CREATED("api.error.common.challenge-created"),
 	COMMON_ERROR_CHALLENGE_NOT_ACTIVE("api.error.common.challenge-not-active"),
+	COMMON_ERROR_BADGE_NAME_ALREADY_EXISTS("api.error.common.badge-name-already-exists"),
+	COMMON_ERROR_BADGE_CRITERIA_TYPE_AND_VALUE_ALREADY_EXISTS("api.error.common.badge-criteria-type-and-value-already-exists"),
 	// Success message constants
 	COMMON_SUCCESS_USER_CREATED("api.success.common.user-created"),
 	COMMON_SUCCESS_FILE_UPLOAD("api.success.common.file-upload"),

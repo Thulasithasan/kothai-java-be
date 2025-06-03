@@ -30,15 +30,15 @@ public class UserChallenge extends Auditable<String> {
     private String typedContent;
 
     @Column(name = "accuracy", nullable = false)
-    private Integer accuracy;
+    private double accuracy;
 
     @Column(name = "speed", nullable = false)
-    private Integer speed;
+    private double speed;
 
     @Column(name = "time_taken", nullable = false)
     private Integer timeTaken;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)  
+    @Column(name = "status", nullable = false)
     private UserChallengeStatus status;
 }

@@ -1,12 +1,13 @@
 package com.dckap.kothai.service.impl;
 
+import com.dckap.kothai.model.Badge;
 import com.dckap.kothai.model.Challenge;
 import com.dckap.kothai.model.User;
 import com.dckap.kothai.model.UserChallenge;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+import com.dckap.kothai.service.BadgeService;
 import com.dckap.kothai.type.UserChallengeStatus;
 import org.springframework.stereotype.Service;
 
@@ -42,9 +43,11 @@ public class UserChallengeServiceImpl implements UserChallengeService {
     @NonNull
     private final CommonMapper commonMapper;
 
+    private final BadgeService badgeService;
+
     @Override
     public ResponseEntityDto createUserChallenge(UserChallengeRequestDto userChallengeRequestDto) {
-        log.info("createUserChallenge: execution started");  
+        log.info("createUserChallenge: execution started");
         User currentUser = userService.getCurrentUser();
         if (currentUser == null) {
             throw new ModuleException(CommonMessageConstant.COMMON_ERROR_USER_NOT_FOUND);
@@ -54,22 +57,33 @@ public class UserChallengeServiceImpl implements UserChallengeService {
                 .orElseThrow(() -> new ModuleException(CommonMessageConstant.COMMON_ERROR_CHALLENGE_NOT_FOUND));
 
         UserChallenge userChallenge = new UserChallenge();
-        userChallenge.setUser(currentUser);
+
         userChallenge.setChallenge(challenge);
         userChallenge.setTypedContent(userChallengeRequestDto.getTypedContent());
         userChallenge.setTimeTaken(userChallengeRequestDto.getTimeTaken());
 
-        int accuracy = calculateAccuracy(challenge.getContent(), userChallengeRequestDto.getTypedContent());
+        double accuracy = calculateAccuracy(challenge.getContent(), userChallengeRequestDto.getTypedContent());
         userChallenge.setAccuracy(accuracy);
 
-        int speed = calculateSpeed(userChallengeRequestDto.getTypedContent(), userChallengeRequestDto.getTimeTaken());
+        double speed = calculateSpeed(userChallengeRequestDto.getTypedContent(), userChallengeRequestDto.getTimeTaken());
         userChallenge.setSpeed(speed);
 
-        userChallenge.setStatus(determineChallengeStatus(challenge, accuracy, speed));
+        UserChallengeStatus status = determineChallengeStatus(challenge, accuracy, speed);
+        userChallenge.setStatus(status);
 
+        if (status.equals(UserChallengeStatus.WIN) || status.equals(UserChallengeStatus.COMPLETED)) {
+            currentUser.setTotalXp(currentUser.getTotalXp() + challenge.getWinXp());
+        } else if (status.equals(UserChallengeStatus.LOSE)) {
+            currentUser.setTotalXp(currentUser.getTotalXp() - challenge.getLoseXp());
+        }
+
+        Badge badge = badgeService.assignBadges(currentUser, challenge, accuracy, speed);
+
+        userChallenge.setUser(currentUser);
         userChallengeRepository.save(userChallenge);
 
-        UserChallengeResponseDto userChallengeResponseDto = commonMapper.createUserChallengeToUserChallengeResponseDto(userChallenge);  
+        UserChallengeResponseDto userChallengeResponseDto = commonMapper.createUserChallengeToUserChallengeResponseDto(userChallenge);
+        userChallengeResponseDto.setBatchName(badge != null ? badge.getName() : null);
 
         log.info("createUserChallenge: execution completed");
         return new ResponseEntityDto(true, userChallengeResponseDto);
@@ -90,7 +104,7 @@ public class UserChallengeServiceImpl implements UserChallengeService {
         return new ResponseEntityDto(true, userChallengeResponseDtos);
     }
 
-    private UserChallengeStatus determineChallengeStatus(Challenge challenge, int userAccuracy, int userSpeed) {
+    private UserChallengeStatus determineChallengeStatus(Challenge challenge, double userAccuracy, double userSpeed) {
         boolean meetsAccuracy = userAccuracy >= challenge.getAccuracy();
         boolean meetsSpeed = userSpeed >= challenge.getSpeed();
 
@@ -105,7 +119,7 @@ public class UserChallengeServiceImpl implements UserChallengeService {
         }
     }
 
-    public static int calculateAccuracy(String actualText, String typedText) {
+    public static double calculateAccuracy(String actualText, String typedText) {
         if (actualText == null || typedText == null || actualText.isEmpty()) return 0;
 
         int correctCount = 0;
@@ -117,10 +131,10 @@ public class UserChallengeServiceImpl implements UserChallengeService {
             }
         }
 
-        return (int) Math.round((correctCount * 100.0) / actualText.length());
+        return Math.round((correctCount * 100.0) / actualText.length());
     }
 
-    public static int calculateSpeed(String typedText, int timeTakenSeconds) {
+    public static double calculateSpeed(String typedText, int timeTakenSeconds) {
         if (typedText == null || timeTakenSeconds <= 0) return 0;
 
         int totalChars = typedText.length();

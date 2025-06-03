@@ -67,13 +67,13 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Override
     public ResponseEntityDto fetchChallengeById(Long challengeId) {
         log.info("fetchChallengeById: execution started");
-        
+
         Optional<Challenge> challenge = challengeRepository.findById(challengeId);
-        
+
         if (challenge.isEmpty()) {
             throw new ModuleException(CommonMessageConstant.COMMON_ERROR_CHALLENGE_NOT_FOUND);
         }
-        
+
         ChallengeResponseDto challengeResponseDto = commonMapper.createChallengeToChallengeResponseDto(challenge.get());
 
         log.info("fetchChallengeById: execution ended");
@@ -82,7 +82,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     public ResponseEntityDto getChallengesByFilter(ChallengeFilterDto challengeFilterDto) {
-
+        log.info("getChallengesByFilter: execution started");
         if (Boolean.TRUE.equals(challengeFilterDto.getIsPaginationRequired())) {
             Pageable pageable = buildPageable(challengeFilterDto);
 
@@ -108,6 +108,7 @@ public class ChallengeServiceImpl implements ChallengeService {
 
     @Override
     public ResponseEntityDto fetchMyChallenges(ChallengeType challengeType) {
+        log.info("fetchMyChallenges: execution started");
         User currentUser = userService.getCurrentUser();
         if (currentUser == null) {
             throw new ModuleException(CommonMessageConstant.COMMON_ERROR_USER_NOT_FOUND);
@@ -131,10 +132,9 @@ public class ChallengeServiceImpl implements ChallengeService {
                     return dto;
                 })
                 .toList();
-
+        log.info("fetchMyChallenges: execution ended");
         return new ResponseEntityDto(true, challengeResponseDtos);
     }
-
 
 
     private Pageable buildPageable(ChallengeFilterDto challengeFilterDto) {

@@ -1,15 +1,17 @@
 package com.dckap.kothai.payload.response;
 
 import lombok.Data;
+import software.amazon.awssdk.services.route53.endpoints.internal.Value;
 
 @Data
 public class UserChallengeResponseDto {
     private Long id;
-    private String challengeId;
-    private String userId;
+    private ChallengeResponseDto challenge;
+    private UserResponseDto user;
     private String status;
     private String typedContent;
     private Integer timeTaken;
-    private Integer accuracy;
-    private Integer speed;
+    private double accuracy;
+    private double speed;
+    private String batchName;
 }

@@ -45,4 +45,7 @@ public interface ChallengeRepository extends JpaRepository<Challenge, Long> {
     @Query("SELECT c FROM Challenge c WHERE c.type = :type ORDER BY c.level ASC")
     List<Challenge> findByType(@Param("type") ChallengeType type);
 
+    @Query("SELECT COUNT(c) FROM Challenge c WHERE c.type = :type AND c.isActive = :isActive")
+    Long countByTypeAndIsActive(@Param("type") ChallengeType type, @Param("isActive") boolean isActive);
+
 }

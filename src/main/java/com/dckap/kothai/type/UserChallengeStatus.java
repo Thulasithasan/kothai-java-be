@@ -4,5 +4,8 @@ public enum UserChallengeStatus {
     COMPLETED,
     FAILED,
     LOW_ACCURACY,
-    LOW_SPEED
+    LOW_SPEED,
+    WIN,
+    LOSE,
+    DRAW 
 }

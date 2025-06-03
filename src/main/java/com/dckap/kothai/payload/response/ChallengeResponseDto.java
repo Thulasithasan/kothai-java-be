@@ -12,8 +12,8 @@ public class ChallengeResponseDto {
     private Integer level;
     private String content;
     private Integer timeLimit;
-    private Integer accuracy;
-    private Integer speed;
+    private double accuracy;
+    private double speed;
     private Boolean isActive;
     private Boolean isBlocked;
 }

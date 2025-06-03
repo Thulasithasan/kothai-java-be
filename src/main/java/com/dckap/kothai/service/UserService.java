@@ -7,4 +7,6 @@ import com.dckap.kothai.payload.response.ResponseEntityDto;
 public interface UserService {
 
     User getCurrentUser();
+
+    ResponseEntityDto getCurrentUserDetails();
 }
