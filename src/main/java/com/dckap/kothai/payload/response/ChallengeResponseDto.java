@@ -1,5 +1,6 @@
 package com.dckap.kothai.payload.response;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.Data;
 import com.dckap.kothai.type.ChallengeType;
 
@@ -16,4 +17,6 @@ public class ChallengeResponseDto {
     private double speed;
     private Boolean isActive;
     private Boolean isBlocked;
+    private Integer winXp;
+    private Integer loseXp;
 }

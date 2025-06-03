@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService {
         userResponseDto.setTotalChallenges(challengeRepository.countByTypeAndIsActive(ChallengeType.LEVEL, true).intValue());
 
         Optional<UserChallenge> optionalUserChallenge = userChallengeRepository.
-                findTopByUserIdOrderByChallengeLevelDesc(currentUser.getUserId());
+                findTopByUserIdAndChallengeTypeOrderByChallengeLevelDesc(currentUser.getUserId(), ChallengeType.LEVEL);
 
         optionalUserChallenge.ifPresent(userChallenge ->
                 userResponseDto.setCurrentLevel(userChallenge.getChallenge().getLevel()));

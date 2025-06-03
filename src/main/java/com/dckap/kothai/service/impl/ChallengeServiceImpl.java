@@ -16,6 +16,7 @@ import com.dckap.kothai.repository.UserChallengeRepository;
 import com.dckap.kothai.service.ChallengeService;
 import com.dckap.kothai.service.UserService;
 import com.dckap.kothai.type.ChallengeType;
+import com.dckap.kothai.type.UserChallengeStatus;
 import com.dckap.kothai.util.transformer.PageTransformer;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +28,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -114,28 +117,42 @@ public class ChallengeServiceImpl implements ChallengeService {
             throw new ModuleException(CommonMessageConstant.COMMON_ERROR_USER_NOT_FOUND);
         }
 
-        Optional<UserChallenge> ouc = userChallengeRepository.findTopByUserIdOrderByChallengeLevelDesc(currentUser.getUserId());
+        List<ChallengeResponseDto> challengeResponseDtos = List.of();
+        if (challengeType.equals(ChallengeType.LEVEL)) {
+            int unlockedLevel;
+            Optional<UserChallenge> ouc = userChallengeRepository.findTopChallenge(currentUser.getUserId(),
+                    UserChallengeStatus.COMPLETED, challengeType);
+            if (ouc.isPresent()) {
+                UserChallenge userChallenge = ouc.get();
+                unlockedLevel = userChallenge.getChallenge().getLevel() + 1;
+            } else {
+                unlockedLevel = 1;
+            }
 
-        int unlockedLevel;
-
-        if (ouc.isPresent()) {
-            UserChallenge userChallenge = ouc.get();
-            unlockedLevel = userChallenge.getChallenge().getLevel() + 1;
-        } else {
-            unlockedLevel = 1;
+            challengeResponseDtos = challengeRepository.findByType(challengeType).stream()
+                    .map(challenge -> {
+                        ChallengeResponseDto dto = commonMapper.createChallengeToChallengeResponseDto(challenge);
+                        dto.setIsBlocked(challenge.getLevel() > unlockedLevel);
+                        return dto;
+                    })
+                    .toList();
+        } else if (challengeType.equals(ChallengeType.DAILY)) {
+            Optional<UserChallenge> ouc = userChallengeRepository.findTopChallenge(currentUser.getUserId(),
+                    null, challengeType);
+            if (ouc.isPresent()) {
+                Challenge challenge = ouc.get().getChallenge();
+                return new ResponseEntityDto(true, commonMapper.createChallengeToChallengeResponseDto(challenge));
+            } else {
+                List<Challenge> challengeList = challengeRepository.findByType(challengeType);
+                Collections.shuffle(challengeList);
+                Challenge  challenge= challengeList.subList(0, Math.min(1, challengeList.size())).getFirst();
+                return new ResponseEntityDto(true, commonMapper.createChallengeToChallengeResponseDto(challenge));
+            }
         }
 
-        List<ChallengeResponseDto> challengeResponseDtos = challengeRepository.findByType(challengeType).stream()
-                .map(challenge -> {
-                    ChallengeResponseDto dto = commonMapper.createChallengeToChallengeResponseDto(challenge);
-                    dto.setIsBlocked(challenge.getLevel() > unlockedLevel);
-                    return dto;
-                })
-                .toList();
         log.info("fetchMyChallenges: execution ended");
         return new ResponseEntityDto(true, challengeResponseDtos);
     }
-
 
     private Pageable buildPageable(ChallengeFilterDto challengeFilterDto) {
         return PageRequest.of(
